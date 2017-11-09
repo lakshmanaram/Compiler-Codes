@@ -58,11 +58,6 @@ public:
 				productions[i].first = find_first(i);
 			}
 		}
-		// adds epsilon to the first of all production rules that contain epsilon
-		for(int i=0;i<productions.size();i++){
-			if(productions[i].epsilon) 
-				productions[i].first.insert('0');
-		}
 	}
 	set<char> find_first(long i) {
 		set<char> ans;
@@ -94,6 +89,11 @@ public:
 				follow_vis[i] = true;
 				productions[i].follow = unions(productions[i].follow, find_follow(i));
 			}
+		}
+		// adds epsilon to the first of all production rules that contain epsilon
+		for(int i=0;i<productions.size();i++){
+			if(productions[i].epsilon) 
+				productions[i].first.insert('0');
 		}	
 	}
 	set<char> find_follow(int n){
