@@ -61,6 +61,7 @@ public:
 	}
 	set<char> find_first(long i) {
 		set<char> ans;
+		cout<<i<<endl;
 		vector<string> rules = productions[i].rhs;
 		for(int j=0;j<rules.size();j++){
 			for(int k=0;k<rules[j].size();k++) {
@@ -137,12 +138,13 @@ public:
 	}
 	void output() {
 		for(int i=0;i<productions.size();i++){
+			cout<<endl;
 			cout<<productions[i].lhs<<" -> ";
 			for(int j=0;j<productions[i].rhs.size();j++){
 				cout<<productions[i].rhs[j]<<", ";
 			}
 			if(productions[i].epsilon) cout<<0;
-			cout<<endl<<endl;
+			cout<<endl;
 			cout<<"First : ";
 			set<char>::iterator it;
 			for(it = productions[i].first.begin();it!= productions[i].first.end();it++){
@@ -156,6 +158,52 @@ public:
 			cout<<endl<<endl;
 		}	
 	}
+
+
+
+	// The code for forming parsing table starts here
+
+
+	set<char> find_affected_values(long i, long j) {
+		// returns the terminals which the rule affects 
+		// Finds the first of RHS
+		set<char> ans;
+		string rule = productions[i].rhs[j];
+		if(rule[0] >= 'A' && rule[0] <= 'Z'){
+			// non-terminal first
+			int k = symbol_rule[rule[0]];
+			ans = productions[k].first;
+			if(productions[k].epsilon) {
+				// RHS first include epsilon
+				ans = unions(ans, productions[k].follow);
+			}
+		} else ans.insert(rule[0]);
+		return ans;
+	}
+	void print_parsing_table() {
+		for(int i=0;i<productions.size();i++){
+			cout<<productions[i].lhs<<endl;
+			vector<string> rules = productions[i].rhs;
+			for(int j=0;j<rules.size();j++) {
+				set<char> values = find_affected_values(i,j);
+				for(set<char>::iterator it = values.begin(); it != values.end(); it++) {
+					if(*it == '0') continue;
+					cout<<" On "<<*it<<" use "<<productions[i].lhs<<" -> "<<rules[j]<<endl;
+				}
+			}
+			if(productions[i].epsilon) {
+				set<char> values = productions[i].follow;
+				for(set<char>::iterator it = values.begin(); it != values.end(); it++) {
+					cout<<" On "<<*it<<" use "<<productions[i].lhs<<" -> epsilon"<<endl;
+				}
+			}
+			cout<<endl<<endl;
+		}
+	}
+
+	// Parsing table code ends here
+
+
 };
 int main(){
 	cout<<"Enter number of productions\n";
@@ -165,24 +213,20 @@ int main(){
 	g.find_first_for_all();
 	g.find_follow_for_all();
 	g.output();
-	
+	g.print_parsing_table();
 	return 0;
 }
 
 
 /*
 Grammar: 
-S -> A
-A -> Bb | Cd
-B -> aB | epsilon
-C -> cC | epsilon
+S -> E
+E -> (E) | {E} | [E] | ab
 
 Input Format:
-4
-S 1 A
-A 2 Bb Cd
-B 2 aB 0
-C 2 cC 0
+2
+S 1 E
+E 4 ab (E) {E} [E] 
 
 Grammar:
 A -> BC
@@ -198,5 +242,18 @@ C 2 +BC 0
 B 1 DE
 E 2 *DE 0
 D 2 i (A)
+
+Grammar: 
+S -> A
+A -> Bb | Cd
+B -> aB | epsilon
+C -> cC | epsilon
+
+Input Format:
+4
+S 1 A
+A 2 Bb Cd
+B 2 aB 0
+C 2 cC 0
 
 */
