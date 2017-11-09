@@ -108,15 +108,17 @@ public:
 				else {
 					while(x < rules[j].size()) {
 						if(rules[j][x] >= 'A' && rules[j][x] <= 'Z'){
-							int l = symbol_rule[x];
+							int l = symbol_rule[rules[j][x]];
 							fol = unions(fol, productions[l].first);
-							if(!productions[l].epsilon) break;
-						} else {
-							// terminal follow
+							if(productions[l].epsilon) {
+								// epsilon non-terminal
+								x++;
+								continue;
+							}
+						} else
+							// terminal
 							fol.insert(rules[j][x]);
-							break;
-						}
-						x++;
+						break;
 					}
 					if(x == rules[j].size()){
 						if(!follow_vis[i]) productions[i].follow = find_follow(i);
@@ -134,7 +136,7 @@ public:
 				cout<<productions[i].rhs[j]<<", ";
 			}
 			if(productions[i].epsilon) cout<<0;
-			cout<<endl;
+			cout<<endl<<endl;
 			cout<<"First : ";
 			set<char>::iterator it;
 			for(it = productions[i].first.begin();it!= productions[i].first.end();it++){
@@ -145,7 +147,7 @@ public:
 			for(it = productions[i].follow.begin();it!= productions[i].follow.end();it++){
 				cout<<*it<<" ";
 			}
-			cout<<endl;
+			cout<<endl<<endl;
 		}	
 	}
 };
@@ -175,4 +177,20 @@ S 1 A
 A 2 Bb Cd
 B 2 aB 0
 C 2 cC 0
+
+Grammar:
+A -> BC
+C -> +BC | epsi
+B -> DE
+E -> *DE | epsi
+D -> i | (A)
+
+Input format:
+5
+A 1 BC
+C 2 +BC 0
+B 1 DE
+E 2 *DE 0
+D 2 i (A)
+
 */
